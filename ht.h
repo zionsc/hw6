@@ -322,14 +322,19 @@ HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
 
   for (HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i) {
-    HashItem* deletePtr = table_[i];
-    if (deletePtr == nullptr) {
-      continue;
+
+    if (table_[i] != NULL) {
+      delete table_[i];
     }
-    else {
-      table_[i] = nullptr;
-      delete deletePtr;
-    }
+
+    // HashItem* deletePtr = table_[i];
+    // if (deletePtr == nullptr) {
+    //   continue;
+    // }
+    // else {
+    //   delete deletePtr;
+    //   table_[i] = nullptr;
+    // }
   }
 
 }
