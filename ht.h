@@ -321,10 +321,11 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
 
-  for (HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i) {
+  for (HASH_INDEX_T i = 0; i < table_.size(); ++i) {
 
     if (table_[i] != NULL) {
       delete table_[i];
+      table_[i] = NULL;
     }
 
     // HashItem* deletePtr = table_[i];
@@ -388,6 +389,12 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 		(repItem->item).second = repVal;
   }
 
+  else if (table_[loc]->deleted == true) {
+    table_[loc]->deleted = false;
+    ValueType repVal = p.second;
+		HashItem* repItem = table_[loc];
+		(repItem->item).second = repVal;
+  }
 }
 
 // To be completed
@@ -476,7 +483,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
 
   ++mIndex_;
-  if (mIndex_ <= 28) {
+  if (mIndex_ <= 27) {
     HASH_INDEX_T size = CAPACITIES[mIndex_];
     std::vector<HashItem*> tableCopy = table_;
     table_.assign(size, nullptr);
@@ -492,16 +499,20 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
         ItemType insertItem = resize->item;
         insert(insertItem);
         --numItem;
+        delete resize;
+        resize = nullptr;
       }
 
       else {
         delete resize;
+        resize = nullptr;
       }
 
     }
     numItem -= numDelete;
     numDelete = 0;
   }
+  
   else {
     throw std::logic_error("Max Capacity!");
   }
